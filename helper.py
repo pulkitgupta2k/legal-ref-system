@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup
 import requests
 from pprint import pprint
-import json
 import re
 import textract
+from emailer import send_email
+import glob
+
 
 def getHTML(link):
     headers = {'User-agent': 'Mozilla/5.0'}
@@ -34,7 +36,12 @@ def check_keyword(keyword, file):
         return False
     return True
 
-def driver():
+def driver(keyword, to_address):
     links = getJudgements()
     for link in links:
         download_file(link)
+    d_files = glob.glob("download_files/*.*")
+    for d_file in d_files:
+        if check_keyword(keyword, d_file):
+            print("Found. Sending Email...")
+            send_email(d_file, to_address)
