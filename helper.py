@@ -3,6 +3,7 @@ import requests
 from pprint import pprint
 import json
 import re
+import textract
 
 def getHTML(link):
     headers = {'User-agent': 'Mozilla/5.0'}
@@ -19,12 +20,21 @@ def getJudgements():
         doc_links.append(doc_link)
     return doc_links
 
-def downloadfile(link):
+def download_file(link):
     name = "download_files/"+link.split('/')[-1]
     d_file = requests.get(link)
     open(name, "wb").write(d_file.content)
 
+def check_keyword(keyword, file):
+    text = textract.process(file)
+    text = str(text.lower())
+    keyword = keyword.lower()
+    key_present = text.find(keyword)
+    if key_present < 0:
+        return False
+    return True
+
 def driver():
     links = getJudgements()
     for link in links:
-        downloadfile(link)
+        download_file(link)
