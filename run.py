@@ -1,6 +1,7 @@
 from helper import *
 
 if __name__ == "__main__":
-    keywords = ["CENTALINE PROPERTY AGENCY LTD", "Dhillon Singh", "BONUS PLUS"]
-    to_addr = "iampulkitgupta2000@gmail.com"
+    file1 = open("input.txt")
+    keywords = file1.read().split('\n')
+    to_addr = "sam@forkast.news"
     day_driver(keywords, to_addr)
