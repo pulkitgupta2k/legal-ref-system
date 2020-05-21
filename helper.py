@@ -37,13 +37,10 @@ def download_file(link):
     d_file = requests.get(link)
     open(name, "wb").write(d_file.content)
 
-def check_keyword(keyword, file):
-    try:
-        text = textract.process(file)
-    except:
-        text = ""
+def check_keyword(keyword, text):
     text = str(text.lower())
     keyword = keyword.lower()
+    # keyword = " {}".format(keyword)
     key_present = text.find(keyword)
     if key_present < 0:
         return False
@@ -68,22 +65,19 @@ def driver(keywords_list, to_address):
     d_files = glob.glob("download_files/*.*")
     for d_file in d_files:
         print(d_file)
+        try:
+            d_file_text = textract.process(d_file)
+        except:
+            d_file_text = ""
         for keyword in keywords_list:
-            keywords = keyword.split(" ")
-            match = 0
-            total = len(keywords)
-            for k in keywords:
-                if check_keyword(k, d_file):
-                    match = match + 1
-            
             with open("sent.json") as f:
                 sent = json.load(f)
-            sent = sent["done"]
-
-            if match/total >0.6 and d_file not in sent:
+            if check_keyword(keyword, d_file_text) > 0 and d_file not in sent:
                 print("Match found. Sending email.")
                 add_sent(d_file)
-                send_email(d_file, to_address)
+                send_email(d_file, to_address, keyword)
+            sent = sent["done"]
+
 
 def day_driver(keywords, to_address):
     while True:

@@ -5,14 +5,14 @@ from email.mime.base import MIMEBase
 from email import encoders 
 from email_creds import *
 
-def send_email(d_file, toaddr):
+def send_email(d_file, toaddr, keyword):
     filename = d_file.split('\\')[-1]
     print(filename)
     msg = MIMEMultipart() 
     msg['From'] = username
     msg['To'] = toaddr 
     msg['Subject'] = "Legal Reference System Update"
-    body = "Please find the attached file at the bottom of this mail."
+    body = "Please find the attached file at the bottom of this mail. Keyword: {}".format(keyword)
     msg.attach(MIMEText(body, 'plain'))
     attachment = open(d_file, "rb") 
     p = MIMEBase('application', 'octet-stream')
