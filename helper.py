@@ -16,6 +16,13 @@ def getHTML(link):
     html = req.content
     return html
 
+# def get_all_judgements():
+#     links = ["https://legalref.judiciary.hk/lrs/common/ju/newjudgments.jsp", "https://legalref.judiciary.hk/lrs/common/ju/newjudgments.jsp?datesel=20052020", "https://legalref.judiciary.hk/lrs/common/ju/newjudgments.jsp?datesel=19052020", "https://legalref.judiciary.hk/lrs/common/ju/newjudgments.jsp?datesel=18052020", "https://legalref.judiciary.hk/lrs/common/ju/newjudgments.jsp?datesel=15052020", "https://legalref.judiciary.hk/lrs/common/ju/newjudgments.jsp?datesel=14052020"]
+#     doc_links = []
+#     for link in links:
+#         doc_links = doc_links + getJudgements(link)
+#     return doc_links
+
 def getJudgements():
     link = "https://legalref.judiciary.hk/lrs/common/ju/newjudgments.jsp"
     html = str(getHTML(link))
@@ -31,7 +38,10 @@ def download_file(link):
     open(name, "wb").write(d_file.content)
 
 def check_keyword(keyword, file):
-    text = textract.process(file)
+    try:
+        text = textract.process(file)
+    except:
+        text = ""
     text = str(text.lower())
     keyword = keyword.lower()
     key_present = text.find(keyword)
@@ -54,26 +64,28 @@ def add_sent(d_file):
 
 
 
-def driver(keyword, to_address):
+def driver(keywords_list, to_address):
     d_files = glob.glob("download_files/*.*")
     for d_file in d_files:
-        keywords = keyword.split(" ")
-        match = 0
-        total = len(keywords)
-        for k in keywords:
-            if check_keyword(k, d_file):
-                match = match + 1
-        
-        with open("sent.json") as f:
-            sent = json.load(f)
-        sent = sent["done"]
+        print(d_file)
+        for keyword in keywords_list:
+            keywords = keyword.split(" ")
+            match = 0
+            total = len(keywords)
+            for k in keywords:
+                if check_keyword(k, d_file):
+                    match = match + 1
+            
+            with open("sent.json") as f:
+                sent = json.load(f)
+            sent = sent["done"]
 
-        if match/total >0.6 and d_file not in sent:
-            print("Match found. Sending email.")
-            add_sent(d_file)
-            send_email(d_file, to_address)
+            if match/total >0.6 and d_file not in sent:
+                print("Match found. Sending email.")
+                add_sent(d_file)
+                send_email(d_file, to_address)
 
-def day_driver(keyword, to_address):
+def day_driver(keywords, to_address):
     while True:
         today = str(date.today())
         with open("today.json" , "r") as f:
@@ -87,7 +99,8 @@ def day_driver(keyword, to_address):
             del_files()
         links = getJudgements()
         for link in links:
+            print(link)
             download_file(link)
-        driver(keyword, to_address)
+        driver(keywords, to_address)
         print('.')
         time.sleep(3600)
