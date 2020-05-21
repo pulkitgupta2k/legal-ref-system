@@ -5,7 +5,7 @@ import re
 import textract
 from emailer import send_email
 import glob
-
+import os, os.path
 
 def getHTML(link):
     headers = {'User-agent': 'Mozilla/5.0'}
@@ -36,6 +36,11 @@ def check_keyword(keyword, file):
         return False
     return True
 
+def del_files():
+    for file in os.scandir("download_files/"):
+        if file.name.endswith(".doc") or file.name.endswith(".docx"):
+            os.unlink(file.path)
+
 def driver(keyword, to_address):
     links = getJudgements()
     for link in links:
@@ -45,3 +50,4 @@ def driver(keyword, to_address):
         if check_keyword(keyword, d_file):
             print("Found. Sending Email...")
             send_email(d_file, to_address)
+    del_files()
